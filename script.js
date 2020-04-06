@@ -82,6 +82,7 @@ async function updatePredictions() {
   			audio.src = 'sounds/' + akkam +'.ogg'
   			success.style.color = "blue"
   			success.innerHTML = "Listen"
+			clearCanvas()
 
   		}
   		}
