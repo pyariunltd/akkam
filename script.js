@@ -145,51 +145,35 @@ function bodyMouseOut(event) {
 }
 
 
+canvas.addEventListener("touchstart", function (e) {
+        mousePos = getTouchPos(canvas, e);
+  var touch = e.touches[0];
+  var mouseEvent = new MouseEvent("mousedown", {
+    clientX: touch.clientX,
+    clientY: touch.clientY
+  });
+  canvas.dispatchEvent(mouseEvent);
+}, false);
+canvas.addEventListener("touchend", function (e) {
+  var mouseEvent = new MouseEvent("mouseup", {});
+  canvas.dispatchEvent(mouseEvent);
+}, false);
+canvas.addEventListener("touchmove", function (e) {
+  var touch = e.touches[0];
+  var mouseEvent = new MouseEvent("mousemove", {
+    clientX: touch.clientX,
+    clientY: touch.clientY
+  });
+  canvas.dispatchEvent(mouseEvent);
+}, false);
 
-function canvasTouchDown(event) {
-  isTouchDown = true;
-  if (hasIntroText) {
-    clearCanvas();
-    hasIntroText = false;
-  }
-  const x = event.offsetX / CANVAS_SCALE;
-  const y = event.offsetY / CANVAS_SCALE;
-
-  // To draw a dot on the mouse down event, we set laxtX and lastY to be
-  // slightly offset from x and y, and then we call `canvasMouseMove(event)`,
-  // which draws a line from (laxtX, lastY) to (x, y) that shows up as a
-  // dot because the difference between those points is so small. However,
-  // if the points were the same, nothing would be drawn, which is why the
-  // 0.001 offset is added.
-  lastX = x + 0.001;
-  lastY = y + 0.001;
-  canvasTouchMove(event);
-}
-
-function canvasTouchMove(event) {
-  const x = event.offsetX / CANVAS_SCALE;
-  const y = event.offsetY / CANVAS_SCALE;
-  if (isTouchDown) {
-    drawLine(lastX, lastY, x, y);
-  }
-  lastX = x;
-  lastY = y;
-}
-
-function bodyTouchUp() {
-  isTouchDown = false;
-}
-
-
-function bodyTouchOut(event) {
-  // We won't be able to detect a MouseUp event if the mouse has moved
-  // ouside the window, so when the mouse leaves the window, we set
-  // `isMouseDown` to false automatically. This prevents lines from
-  // continuing to be drawn when the mouse returns to the canvas after
-  // having been released outside the window.
-  if (!event.relatedTarget || event.relatedTarget.nodeName === "HTML") {
-    isTouchDown = false;
-  }
+// Get the position of a touch relative to the canvas
+function getTouchPos(canvasDom, touchEvent) {
+  var rect = canvasDom.getBoundingClientRect();
+  return {
+    x: touchEvent.touches[0].clientX - rect.left,
+    y: touchEvent.touches[0].clientY - rect.top
+  };
 }
 
 canvas.addEventListener("mousedown", canvasMouseDown);
@@ -197,9 +181,7 @@ canvas.addEventListener("mousemove", canvasMouseMove);
 document.body.addEventListener("mouseup", bodyMouseUp);
 document.body.addEventListener("mouseout", bodyMouseOut);
 clearButton.addEventListener("mousedown", clearCanvas);
-canvas.body.addEventListener("touchstart",canvasTouchDown);
-canvas.addEventListener("touchmove",canvasTouchMove);
-canvas.addEventListener("touchend",bodyTouchUp);
+
 
 document.body.addEventListener("touchstart", function (e) {
   if (e.target == canvas) {
