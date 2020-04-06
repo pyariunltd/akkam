@@ -8,12 +8,9 @@ const success = document.getElementById("success");
 const clearButton = document.getElementById("clear-button");
 
 
-
-let isMouseDown = false;
-let isTouchDown = false;
-let hasIntroText = true;
-let lastX = 0;
-let lastY = 0;
+var drawing = false;
+var mousePos = { x:0, y:0 };
+var lastPos = mousePos;
 
 const audio = document.getElementById("music");
 audio.src = 'sounds/' + akkam +'.ogg'
@@ -35,11 +32,7 @@ ctx.strokeStyle = "#212121";
 
 function clearCanvas() {
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-  for (let i = 0; i < 10; i++) {
-    const element = document.getElementById(`prediction-${i}`);
-    element.className = "prediction-col";
-    element.children[0].children[0].style.height = "0";
-  }
+  
 }
 
 function drawLine(fromX, fromY, toX, toY) {
@@ -49,6 +42,7 @@ function drawLine(fromX, fromY, toX, toY) {
   ctx.lineTo(toX, toY);
   ctx.closePath();
   ctx.stroke();
+  lastPos = mousePos;
   updatePredictions();
 }
 function sleep(ms) {
@@ -98,53 +92,32 @@ async function updatePredictions() {
 }
 
 
-function canvasMouseDown(event) {
-  isMouseDown = true;
-  if (hasIntroText) {
-    clearCanvas();
-    hasIntroText = false;
+canvas.addEventListener("mousedown", function (e) {
+        drawing = true;        
+  lastPos = getMousePos(canvas, e);
+}, false);
+canvas.addEventListener("mouseup", function (e) {
+  drawing = false;
+}, false);
+canvas.addEventListener("mousemove", function (e) {
+  mousePos = getMousePos(canvas, e); 
+  if (drawing) {
+  	drawLine(lastPos.x, lastPos.y,mousePos.x, mousePos.y); 
   }
-  const x = event.offsetX / CANVAS_SCALE;
-  const y = event.offsetY / CANVAS_SCALE;
+}, false);
 
-  // To draw a dot on the mouse down event, we set laxtX and lastY to be
-  // slightly offset from x and y, and then we call `canvasMouseMove(event)`,
-  // which draws a line from (laxtX, lastY) to (x, y) that shows up as a
-  // dot because the difference between those points is so small. However,
-  // if the points were the same, nothing would be drawn, which is why the
-  // 0.001 offset is added.
-  lastX = x + 0.001;
-  lastY = y + 0.001;
-  canvasMouseMove(event);
+
+// Get the position of the mouse relative to the canvas
+function getMousePos(canvasDom, mouseEvent) {
+  var rect = canvasDom.getBoundingClientRect();
+  
+  return {
+    x: 2*(mouseEvent.clientX - rect.left),
+    y: 2*(mouseEvent.clientY - rect.top)
+  };
 }
 
-function canvasMouseMove(event) {
-  const x = event.offsetX / CANVAS_SCALE;
-  const y = event.offsetY / CANVAS_SCALE;
-  if (isMouseDown) {
-    drawLine(lastX, lastY, x, y);
-  }
-  lastX = x;
-  lastY = y;
-}
-
-function bodyMouseUp() {
-  isMouseDown = false;
-}
-
-
-function bodyMouseOut(event) {
-  // We won't be able to detect a MouseUp event if the mouse has moved
-  // ouside the window, so when the mouse leaves the window, we set
-  // `isMouseDown` to false automatically. This prevents lines from
-  // continuing to be drawn when the mouse returns to the canvas after
-  // having been released outside the window.
-  if (!event.relatedTarget || event.relatedTarget.nodeName === "HTML") {
-    isMouseDown = false;
-  }
-}
-
-
+// Set up touch events for mobile, etc
 canvas.addEventListener("touchstart", function (e) {
         mousePos = getTouchPos(canvas, e);
   var touch = e.touches[0];
@@ -171,16 +144,11 @@ canvas.addEventListener("touchmove", function (e) {
 function getTouchPos(canvasDom, touchEvent) {
   var rect = canvasDom.getBoundingClientRect();
   return {
-    x: touchEvent.touches[0].clientX - rect.left,
-    y: touchEvent.touches[0].clientY - rect.top
+    x: 2*(touchEvent.touches[0].clientX - rect.left),
+    y: 2*(touchEvent.touches[0].clientY - rect.top)
   };
 }
 
-canvas.addEventListener("mousedown", canvasMouseDown);
-canvas.addEventListener("mousemove", canvasMouseMove);
-document.body.addEventListener("mouseup", bodyMouseUp);
-document.body.addEventListener("mouseout", bodyMouseOut);
-clearButton.addEventListener("mousedown", clearCanvas);
 
 
 document.body.addEventListener("touchstart", function (e) {
@@ -199,3 +167,4 @@ document.body.addEventListener("touchmove", function (e) {
   }
 }, false);
 
+clearButton.addEventListener("mousedown", clearCanvas);
