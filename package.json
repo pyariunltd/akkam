@@ -1,0 +1,19 @@
+{
+  "name": "pytorch-to-javascript-with-onnx",
+  "version": "1.0.0",
+  "description": "PyTorch to JavaScript demo using ONNX.js.",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve"
+  },
+  "author": "Elliot Waite",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elliotwaite/pytorch-to-javascript/issues"
+  },
+  "homepage": "https://github.com/elliotwaite/pytorch-to-javascript",
+  "devDependencies": {
+    "serve": "^11.2.0"
+  },
+  "keywords": []
+}
