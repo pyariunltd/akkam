@@ -198,7 +198,7 @@ document.body.addEventListener("mouseup", bodyMouseUp);
 document.body.addEventListener("mouseout", bodyMouseOut);
 clearButton.addEventListener("mousedown", clearCanvas);
 canvas.body.addEventListener("touchstart",canvasTouchDown);
-canvas.addEventListener("touchend",canvasTouchMove);
+canvas.addEventListener("touchmove",canvasTouchMove);
 canvas.addEventListener("touchend",bodyTouchUp);
 
 document.body.addEventListener("touchstart", function (e) {
