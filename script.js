@@ -1,4 +1,4 @@
-const CANVAS_SIZE = 280;
+const CANVAS_SIZE = 1120;
 const CANVAS_SCALE = 0.5;
 
 var akkam = Math.floor(Math.random() * 10);
@@ -19,7 +19,7 @@ const sess = new onnx.InferenceSession();
 const loadingModelPromise = sess.loadModel("./onnx_model.onnx");
 
 // Add 'Draw a number here!' to the canvas.
-ctx.lineWidth = 28;
+ctx.lineWidth = 112;
 ctx.lineJoin = "round";
 ctx.font = "28px sans-serif";
 ctx.textAlign = "center";
@@ -29,6 +29,7 @@ ctx.fillText("Draw a number here!", CANVAS_SIZE / 2, CANVAS_SIZE / 2);
 
 // Set the line color for the canvas.
 ctx.strokeStyle = "#212121";
+
 
 function clearCanvas() {
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -44,6 +45,7 @@ function drawLine(fromX, fromY, toX, toY) {
   ctx.stroke();
   lastPos = mousePos;
   updatePredictions();
+
 }
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -53,6 +55,7 @@ function sleep(ms) {
 async function updatePredictions() {
 	
   // Get the predictions for the canvas data.
+  
   const imgData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
   const input = new onnx.Tensor(new Float32Array(imgData.data), "float32");
 
@@ -82,7 +85,7 @@ async function updatePredictions() {
   			audio.src = 'sounds/' + akkam +'.ogg'
   			success.style.color = "blue"
   			success.innerHTML = "Listen"
-			clearCanvas()
+  			clearCanvas()
 
   		}
   		}
@@ -113,8 +116,10 @@ function getMousePos(canvasDom, mouseEvent) {
   var rect = canvasDom.getBoundingClientRect();
   
   return {
-    x: 2*(mouseEvent.clientX - rect.left),
-    y: 2*(mouseEvent.clientY - rect.top)
+    x: 2*(mouseEvent.offsetX),
+    y: 2*(mouseEvent.offsetY)
+    //  x: 2*(mouseEvent.clientX - rect.left),
+    // y: 2*(mouseEvent.clientY - rect.top)
   };
 }
 
@@ -145,8 +150,8 @@ canvas.addEventListener("touchmove", function (e) {
 function getTouchPos(canvasDom, touchEvent) {
   var rect = canvasDom.getBoundingClientRect();
   return {
-    x: 2*(touchEvent.touches[0].clientX - rect.left),
-    y: 2*(touchEvent.touches[0].clientY - rect.top)
+    x: 2*(touchEvent.touches[0].offsetX),
+    y: 2*(touchEvent.touches[0].offsetY)
   };
 }
 
