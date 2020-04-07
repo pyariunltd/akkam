@@ -1,4 +1,4 @@
-const CANVAS_SIZE = 1120;
+const CANVAS_SIZE = 280;
 const CANVAS_SCALE = 0.5;
 
 var akkam = Math.floor(Math.random() * 10);
@@ -19,7 +19,7 @@ const sess = new onnx.InferenceSession();
 const loadingModelPromise = sess.loadModel("./onnx_model.onnx");
 
 // Add 'Draw a number here!' to the canvas.
-ctx.lineWidth = 112;
+ctx.lineWidth = 28;
 ctx.lineJoin = "round";
 ctx.font = "28px sans-serif";
 ctx.textAlign = "center";
