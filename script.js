@@ -8,6 +8,7 @@ const success = document.getElementById("success");
 const clearButton = document.getElementById("clear-button");
 
 
+
 var drawing = false;
 var mousePos = { x:0, y:0 };
 var lastPos = mousePos;
@@ -53,7 +54,7 @@ function sleep(ms) {
 
 
 async function updatePredictions() {
-	
+  
   // Get the predictions for the canvas data.
   
   const imgData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
@@ -78,17 +79,17 @@ async function updatePredictions() {
         : "prediction-col";
         if (predictions[i] === maxPrediction){
         if (i === akkam) { 
-        	success.style.color = "green"
-        	success.innerHTML = "Success"
-        	await sleep(3000);
-  			akkam = Math.floor(Math.random() * 10);
-  			audio.src = 'sounds/' + akkam +'.ogg'
-  			success.style.color = "blue"
-  			success.innerHTML = "Listen"
-  			clearCanvas()
+          success.style.color = "green"
+          success.innerHTML = "Success"
+          await sleep(3000);
+        akkam = Math.floor(Math.random() * 10);
+        audio.src = 'sounds/' + akkam +'.ogg'
+        success.style.color = "blue"
+        success.innerHTML = "Listen"
+        clearCanvas()
 
-  		}
-  		}
+      }
+      }
    
 
         
@@ -106,7 +107,7 @@ canvas.addEventListener("mouseup", function (e) {
 canvas.addEventListener("mousemove", function (e) {
   mousePos = getMousePos(canvas, e); 
   if (drawing) {
-  	drawLine(lastPos.x, lastPos.y,mousePos.x, mousePos.y); 
+    drawLine(lastPos.x, lastPos.y,mousePos.x, mousePos.y); 
   }
 }, false);
 
@@ -150,12 +151,13 @@ canvas.addEventListener("touchmove", function (e) {
 function getTouchPos(canvasDom, touchEvent) {
   var rect = canvasDom.getBoundingClientRect();
   return {
-    x: 2*(touchEvent.touches[0].offsetX),
-    y: 2*(touchEvent.touches[0].offsetY)
+    x: touchEvent.touches[0].clientX - rect.left,
+    y: touchEvent.touches[0].clientY - rect.top
   };
 }
 
 
+clearButton.addEventListener("mousedown", clearCanvas);
 
 document.body.addEventListener("touchstart", function (e) {
   if (e.target == canvas) {
@@ -173,4 +175,3 @@ document.body.addEventListener("touchmove", function (e) {
   }
 }, false);
 
-clearButton.addEventListener("mousedown", clearCanvas);
