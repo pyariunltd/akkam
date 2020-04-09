@@ -133,7 +133,7 @@ async function updatePredictions() {
         getMousePos(e);
 
         // Draw a dot if the mouse button is currently being pressed
-        if (mouseDown==1) {
+        if (isMouseDown==1) {
             drawLine(lastX,lastY,mouseX,mouseY,28);
         }
     }
