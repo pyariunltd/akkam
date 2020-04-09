@@ -9,7 +9,7 @@ const clearButton = document.getElementById("clear-button");
 
 
 
-let isMouseDown = false;
+let mouseDown = 0;
 let hasIntroText = true;
 let lastX = 0;
 let lastY = 0;
@@ -106,13 +106,17 @@ async function updatePredictions() {
 }
 
 // Clear the canvas context using the canvas width and height
-    function clearCanvas() {
+    function clearCanvas2() {
         ctx.clearRect(0, 0, 280, 280);
     }
 
     // Keep track of the mouse button being pressed and draw a dot at current location
     function sketchpad_mouseDown(e) {
-        isMouseDown = true;
+        mouseDown=1;
+        if (hasIntroText) {
+        clearCanvas();
+        hasIntroText = false;
+        }
         getMousePos(e);
         lastX = mouseX
         lastY = mouseY
@@ -122,7 +126,7 @@ async function updatePredictions() {
 
     // Keep track of the mouse button being released
     function sketchpad_mouseUp() {
-        isMouseDown = false;
+        mouseDown=0;
     }
 
     // Keep track of the mouse position and draw a dot if mouse button is currently pressed
@@ -133,7 +137,7 @@ async function updatePredictions() {
         getMousePos(e);
 
         // Draw a dot if the mouse button is currently being pressed
-        if (isMouseDown) {
+        if (mouseDown==1) {
             drawLine(lastX,lastY,mouseX,mouseY,28);
         }
     }
@@ -156,6 +160,10 @@ async function updatePredictions() {
     // Draw something when a touch start is detected
     function sketchpad_touchStart() {
         // Update the touch co-ordinates
+        if (hasIntroText) {
+        clearCanvas();
+        hasIntroText = false;
+        }
         getTouchPos();
         lastX = touchX
         lastY = touchY
