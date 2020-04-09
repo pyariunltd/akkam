@@ -112,7 +112,7 @@ async function updatePredictions() {
 
     // Keep track of the mouse button being pressed and draw a dot at current location
     function sketchpad_mouseDown(e) {
-        mouseDown=1;
+        isMouseDown = true;
         getMousePos(e);
         lastX = mouseX
         lastY = mouseY
@@ -122,7 +122,7 @@ async function updatePredictions() {
 
     // Keep track of the mouse button being released
     function sketchpad_mouseUp() {
-        mouseDown=0;
+        isMouseDown = false;
     }
 
     // Keep track of the mouse position and draw a dot if mouse button is currently pressed
@@ -133,7 +133,7 @@ async function updatePredictions() {
         getMousePos(e);
 
         // Draw a dot if the mouse button is currently being pressed
-        if (isMouseDown==1) {
+        if (isMouseDown) {
             drawLine(lastX,lastY,mouseX,mouseY,28);
         }
     }
