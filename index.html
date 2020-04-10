@@ -2,10 +2,16 @@
   <head>
     <link rel="stylesheet" href="style.css" />
   </head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
   <body>
 
+
     <div class="card elevation" style="text-align:center">
+    	<div>
+    	<h1 >അക്കം</h1>
+    	<h3>Play the audio and write the digit in the below canvas</h3>
+    	</div>
       <div>
       <audio controls autoplay id="music">
       <source src="sounds/1.ogg" type="audio/ogg">
@@ -15,7 +21,7 @@
       <br>
       
       <canvas
-        class="canvas elevation"
+        class="canvas"
         id="canvas"
         width="280"
         height="280"
@@ -109,6 +115,6 @@
     
 
     <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
-    <script src="script_Mine2.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>

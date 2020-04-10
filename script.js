@@ -7,11 +7,14 @@ const ctx = canvas.getContext("2d");
 const success = document.getElementById("success");
 const clearButton = document.getElementById("clear-button");
 
+success.style.color = "#afa1b5"
+success.innerHTML = "..."
 
-
-var drawing = false;
-var mousePos = { x:0, y:0 };
-var lastPos = mousePos;
+let mouseDown = 0;
+let hasIntroText = true;
+let lastX = 0;
+let lastY = 0;
+var touchX,touchY,mouseX,mouseY;
 
 const audio = document.getElementById("music");
 audio.src = 'sounds/' + akkam +'.ogg'
@@ -25,16 +28,19 @@ ctx.lineJoin = "round";
 ctx.font = "28px sans-serif";
 ctx.textAlign = "center";
 ctx.textBaseline = "middle";
-ctx.fillStyle = "#212121";
-ctx.fillText("Draw a number here!", CANVAS_SIZE / 2, CANVAS_SIZE / 2);
+ctx.fillStyle = "#c9c9c9";
+ctx.fillText("DRAW HERE!", CANVAS_SIZE / 2, CANVAS_SIZE / 2);
 
 // Set the line color for the canvas.
 ctx.strokeStyle = "#212121";
 
-
 function clearCanvas() {
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-  
+  for (let i = 0; i < 10; i++) {
+    const element = document.getElementById(`prediction-${i}`);
+    element.className = "prediction-col";
+    element.children[0].children[0].style.height = "0";
+  }
 }
 
 function drawLine(fromX, fromY, toX, toY) {
@@ -44,9 +50,8 @@ function drawLine(fromX, fromY, toX, toY) {
   ctx.lineTo(toX, toY);
   ctx.closePath();
   ctx.stroke();
-  lastPos = mousePos;
-  updatePredictions();
-
+  
+  //updatePredictions();
 }
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -54,9 +59,8 @@ function sleep(ms) {
 
 
 async function updatePredictions() {
-  
+	
   // Get the predictions for the canvas data.
-  
   const imgData = ctx.getImageData(0, 0, CANVAS_SIZE, CANVAS_SIZE);
   const input = new onnx.Tensor(new Float32Array(imgData.data), "float32");
 
@@ -65,6 +69,8 @@ async function updatePredictions() {
   const outputTensor = outputMap.values().next().value;
   const predictions = outputTensor.data;
   const maxPrediction = Math.max(...predictions);
+  var audioSuccess = new Audio('sounds/Applause.ogg');
+
   
   
 
@@ -78,100 +84,187 @@ async function updatePredictions() {
         ? "prediction-col top-prediction"
         : "prediction-col";
         if (predictions[i] === maxPrediction){
-        if (i === akkam) { 
-          success.style.color = "green"
-          success.innerHTML = "Success"
-          await sleep(3000);
-        akkam = Math.floor(Math.random() * 10);
-        audio.src = 'sounds/' + akkam +'.ogg'
-        success.style.color = "blue"
-        success.innerHTML = "Listen"
-        clearCanvas()
+        if (i === akkam) {
+          if (maxPrediction > 0.5){ 
+                  success.style.color = "green"
+                  success.innerHTML = "GOOD!!!"
+                  await sleep(300);
+                  audioSuccess.play();
+                  success.style.color = "#eedaf7"
+                  await sleep(300);
+                  success.style.color = "green"
+                  await sleep(300);
+                  success.style.color = "#eedaf7"
+                  await sleep(300);
+                  success.style.color = "green"
+                  await sleep(300);
+                  success.style.color = "#eedaf7"
+                  await sleep(300);
+                  success.style.color = "green"
+                  await sleep(2000);
+                akkam = Math.floor(Math.random() * 10);
+                audio.src = 'sounds/' + akkam +'.ogg'
+                success.style.color = "#afa1b5"
+                success.innerHTML = "..."
+                clearCanvas()
+              }
 
-      }
-      }
+  		}
+  		}
    
 
         
   }
 }
 
+// Clear the canvas context using the canvas width and height
+    function clearCanvas2() {
+        ctx.clearRect(0, 0, 280, 280);
+    }
 
-canvas.addEventListener("mousedown", function (e) {
-        drawing = true;        
-  lastPos = getMousePos(canvas, e);
-}, false);
-canvas.addEventListener("mouseup", function (e) {
-  drawing = false;
-}, false);
-canvas.addEventListener("mousemove", function (e) {
-  mousePos = getMousePos(canvas, e); 
-  if (drawing) {
-    drawLine(lastPos.x, lastPos.y,mousePos.x, mousePos.y); 
-  }
-}, false);
+    // Keep track of the mouse button being pressed and draw a dot at current location
+    function sketchpad_mouseDown(e) {
+        mouseDown=1;
+        if (hasIntroText) {
+        clearCanvas();
+        hasIntroText = false;
+        }
+        getMousePos(e);
+        lastX = mouseX
+        lastY = mouseY
+        // drawDot(ctx,mouseX,mouseY,28);
+
+    }
+
+    // Keep track of the mouse button being released
+    function sketchpad_mouseUp() {
+        mouseDown=0;
+        updatePredictions();
+    }
+
+    // Keep track of the mouse position and draw a dot if mouse button is currently pressed
+    function sketchpad_mouseMove(e) { 
+        // Update the mouse co-ordinates when moved
+        lastX = mouseX
+        lastY = mouseY
+        getMousePos(e);
+
+        // Draw a dot if the mouse button is currently being pressed
+        if (mouseDown==1) {
+            drawLine(lastX,lastY,mouseX,mouseY,28);
+        }
+    }
+
+    // Get the current mouse position relative to the top-left of the canvas
+    function getMousePos(e) {
+        if (!e)
+            var e = event;
+
+        if (e.offsetX) {
+            mouseX = e.offsetX / CANVAS_SCALE;
+            mouseY = e.offsetY / CANVAS_SCALE;
+        }
+        else if (e.layerX) {
+            mouseX = e.layerX / CANVAS_SCALE;
+            mouseY = e.layerY / CANVAS_SCALE;
+        }
+     }
+
+    // Draw something when a touch start is detected
+    function sketchpad_touchStart() {
+        // Update the touch co-ordinates
+        if (hasIntroText) {
+        clearCanvas();
+        hasIntroText = false;
+        }
+        getTouchPos();
+        lastX = touchX
+        lastY = touchY
+
+        // drawDot(ctx,lastX,lastY,touchX,touchY,28);
+
+        // Prevents an additional mousedown event being triggered
+        event.preventDefault();
+    }
+
+    // Draw something and prevent the default scrolling when touch movement is detected
+    function sketchpad_touchMove(e) { 
+        lastX = touchX
+        lastY = touchY
+        // Update the touch co-ordinates
+        getTouchPos(e);
+
+        // During a touchmove event, unlike a mousemove event, we don't need to check if the touch is engaged, since there will always be contact with the screen by definition.
+        drawLine(lastX,lastY,touchX,touchY,28); 
+
+        // Prevent a scrolling action as a result of this touchmove triggering.
+        event.preventDefault();
+    }
+
+    // Get the touch position relative to the top-left of the canvas
+    // When we get the raw values of pageX and pageY below, they take into account the scrolling on the page
+    // but not the position relative to our target div. We'll adjust them using "target.offsetLeft" and
+    // "target.offsetTop" to get the correct values in relation to the top left of the canvas.
+    function getTouchPos(e) {
+        if (!e)
+            var e = event;
+
+        if(e.touches) {
+            if (e.touches.length == 1) { // Only deal with one finger
+                var touch = e.touches[0]; // Get the information for finger #1
+                touchX=(touch.pageX-touch.target.offsetLeft) / CANVAS_SCALE;
+                touchY=(touch.pageY-touch.target.offsetTop) / CANVAS_SCALE;
+            }
+        }
+    }
+    function sketchpad_touchEnd(e) { 
+        updatePredictions();
+    }
 
 
-// Get the position of the mouse relative to the canvas
-function getMousePos(canvasDom, mouseEvent) {
-  var rect = canvasDom.getBoundingClientRect();
-  
-  return {
-    x: 2*(mouseEvent.offsetX),
-    y: 2*(mouseEvent.offsetY)
-    //  x: 2*(mouseEvent.clientX - rect.left),
-    // y: 2*(mouseEvent.clientY - rect.top)
-  };
-}
-
-// Set up touch events for mobile, etc
-canvas.addEventListener("touchstart", function (e) {
-        mousePos = getTouchPos(canvas, e);
-  var touch = e.touches[0];
-  var mouseEvent = new MouseEvent("mousedown", {
-    clientX: touch.clientX,
-    clientY: touch.clientY
-  });
-  canvas.dispatchEvent(mouseEvent);
-}, false);
-canvas.addEventListener("touchend", function (e) {
-  var mouseEvent = new MouseEvent("mouseup", {});
-  canvas.dispatchEvent(mouseEvent);
-}, false);
-canvas.addEventListener("touchmove", function (e) {
-  var touch = e.touches[0];
-  var mouseEvent = new MouseEvent("mousemove", {
-    clientX: touch.clientX,
-    clientY: touch.clientY
-  });
-  canvas.dispatchEvent(mouseEvent);
-}, false);
-
-// Get the position of a touch relative to the canvas
-function getTouchPos(canvasDom, touchEvent) {
-  var rect = canvasDom.getBoundingClientRect();
-  return {
-    x: touchEvent.touches[0].clientX - rect.left,
-    y: touchEvent.touches[0].clientY - rect.top
-  };
-}
+    // Set-up the canvas and add our event handlers after the page has loaded
+    function init() {
 
 
-clearButton.addEventListener("mousedown", clearCanvas);
+        // Get the specific canvas element from the HTML document
+        
+        // const success = document.getElementById("success");
+        // canvas = document.getElementById('sketchpad');
+        // // audio.src = 'sounds/' + akkam + '.ogg';
 
-document.body.addEventListener("touchstart", function (e) {
-  if (e.target == canvas) {
-    e.preventDefault();
-  }
-}, false);
-document.body.addEventListener("touchend", function (e) {
-  if (e.target == canvas) {
-    e.preventDefault();
-  }
-}, false);
-document.body.addEventListener("touchmove", function (e) {
-  if (e.target == canvas) {
-    e.preventDefault();
-  }
-}, false);
+        // // If the browser supports the canvas tag, get the 2d drawing context for this canvas
+        // if (canvas.getContext)
+        //     ctx = canvas.getContext('2d');
+        //         ctx.lineWidth = 28;
+        //         ctx.lineJoin = "round";
+        //         ctx.font = "28px sans-serif";
+        //         ctx.textAlign = "center";
+        //         ctx.textBaseline = "middle";
+        //         ctx.fillStyle = "#212121";
+        //         ctx.fillText("Draw a number here!", 140,140);
 
+        // Check that we have a valid context to draw on/with before adding event handlers
+        // if (ctx) {
+        //     // React to mouse events on the canvas, and mouseup on the entire document
+        //     canvas.addEventListener('mousedown', sketchpad_mouseDown, false);
+        //     canvas.addEventListener('mousemove', sketchpad_mouseMove, false);
+        //     window.addEventListener('mouseup', sketchpad_mouseUp, false);
+
+        //     // React to touch events on the canvas
+        //     canvas.addEventListener('touchstart', sketchpad_touchStart, false);
+        //     canvas.addEventListener('touchmove', sketchpad_touchMove, false);
+        // }
+    }
+    if (ctx) {
+            // React to mouse events on the canvas, and mouseup on the entire document
+            canvas.addEventListener('mousedown', sketchpad_mouseDown, false);
+            canvas.addEventListener('mousemove', sketchpad_mouseMove, false);
+            window.addEventListener('mouseup', sketchpad_mouseUp, false);
+
+            // React to touch events on the canvas
+            canvas.addEventListener('touchstart', sketchpad_touchStart, false);
+            canvas.addEventListener('touchmove', sketchpad_touchMove, false);
+            window.addEventListener('touchend', sketchpad_touchEnd, false);
+
+            clearButton.addEventListener("mousedown", clearCanvas);
+        }
